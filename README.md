@@ -61,13 +61,11 @@
 | **Styling** | Tailwind CSS v3 + shadcn/ui |
 | **AI 분석** | Gemini 2.5 Flash |
 | **Search Grounding** | Google Search Retrieval (Gemini 내장) |
-| **이미지 생성** | Imagen 3 (화자 유형 캐릭터) |
 | **번역** | Google Cloud Translation API |
 | **STT** | Gemini 2.5 Flash Multimodal |
 | **TTS** | Google Cloud Text-to-Speech — Chirp3-HD-Charon |
 | **영상 이해** | Gemini 2.5 Flash Multimodal (YouTube URL 직접 처리) |
 | **공유** | Firebase Firestore |
-| **배포** | Docker (NAS / 자체 서버) |
 
 ---
 
@@ -100,26 +98,6 @@ FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-### 3. 개발 서버 실행
-
-```bash
-npm run dev
-```
-
-[http://localhost:3000](http://localhost:3000) 에서 확인
-
----
-
-## 🐳 Docker 배포 (NAS / 자체 서버)
-
-```bash
-docker build -t jeonduyeop .
-docker run -p 3000:3000 --env-file .env.local jeonduyeop
-```
-
-또는 `docker-compose up -d`
-
----
 
 ## 📁 프로젝트 구조
 
