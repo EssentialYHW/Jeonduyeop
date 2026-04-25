@@ -38,7 +38,7 @@
 
 ### 🎤 다양한 입력 방식
 - **텍스트** 직접 입력 (비한국어 자동 감지 → 한국어 번역 후 분석)
-- **음성** 녹음 → 자동 텍스트 변환 후 분석
+- **음성** 녹음 → Gemini 2.5 Flash 멀티모달 음성 인식
 - **영상/음성 파일** 업로드 (MP4, MOV, MP3, WAV 등)
 - **YouTube URL** 입력 → Gemini가 영상 내용을 직접 받아쓰기
 
@@ -63,9 +63,9 @@
 | **Search Grounding** | Google Search Retrieval (Gemini 내장) |
 | **이미지 생성** | Imagen 3 (화자 유형 캐릭터) |
 | **번역** | Google Cloud Translation API |
-| **STT** | Google Cloud Speech-to-Text — Chirp 2 |
+| **STT** | Gemini 2.5 Flash Multimodal |
 | **TTS** | Google Cloud Text-to-Speech — Chirp3-HD-Charon |
-| **영상 이해** | Gemini Multimodal (YouTube URL 직접 처리) |
+| **영상 이해** | Gemini 2.5 Flash Multimodal (YouTube URL 직접 처리) |
 | **공유** | Firebase Firestore |
 | **배포** | Docker (NAS / 자체 서버) |
 
@@ -89,7 +89,7 @@ npm install
 # Google AI Studio: https://aistudio.google.com/apikey
 GEMINI_API_KEY=your_gemini_api_key
 
-# Google Cloud Console (Speech-to-Text / TTS / Translate API 활성화)
+# Google Cloud Console (TTS / Translate API 활성화)
 GOOGLE_CLOUD_API_KEY=your_google_cloud_api_key
 
 # Firebase Console: https://console.firebase.google.com
@@ -131,7 +131,7 @@ jeonduyeop/
 │   │   ├── conversation/  # 대화 전체 분석
 │   │   ├── imagen/        # 화자 캐릭터 이미지 생성 (Imagen 3)
 │   │   ├── share/         # 결과 공유 (Firebase Firestore)
-│   │   ├── stt/           # 음성 → 텍스트 (Google Cloud STT Chirp 2)
+│   │   ├── stt/           # 음성 인식 (Gemini 2.5 Flash Multimodal)
 │   │   ├── translate/     # 언어 감지 + 한국어 번역
 │   │   ├── tts/           # 텍스트 → 음성 (Google Cloud TTS Chirp3-HD)
 │   │   └── youtube/       # YouTube URL → 발화 추출 (Gemini Multimodal)

@@ -20,23 +20,15 @@ export async function POST(request: NextRequest) {
     if (audioBuffer.byteLength < 1000) {
       return NextResponse.json({ error: "오디오가 너무 짧습니다. 다시 녹음해주세요." }, { status: 400 });
     }
+
     const audioBase64 = Buffer.from(audioBuffer).toString("base64");
     const mimeType = (audioFile.type || "audio/webm") as string;
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType,
-          data: audioBase64,
-        },
-      },
-      {
-        text: `이 오디오에서 말하는 내용을 한국어로 그대로 받아써주세요.
-- 분석/해설 없이 발화 내용만 텍스트로 출력
-- 다른 부가 설명 없이 발화 텍스트만 응답`,
-      },
+      { inlineData: { mimeType, data: audioBase64 } },
+      { text: "이 오디오에서 말하는 내용을 한국어로 그대로 받아써주세요. 발화 텍스트만 출력하세요." },
     ]);
 
     const text = result.response.text().trim();
