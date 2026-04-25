@@ -10,6 +10,7 @@ import RankingBar from "@/components/RankingBar";
 import CaptureButton from "@/components/CaptureButton";
 import { UserBubble, AssistantBubble, TypingBubble } from "@/components/ChatBubble";
 import ConversationResultCard from "@/components/ConversationResultCard";
+import ShareButton from "@/components/ShareButton";
 import { AnalysisResult, ConversationResult } from "@/types";
 import { randomLoadingPhrase } from "@/lib/loadingPhrases";
 import { recordSpeaker } from "@/lib/ranking";
@@ -26,6 +27,7 @@ interface Message {
   source?: InputSource;
   result?: AnalysisResult;
   conversationResult?: ConversationResult;
+  translatedFrom?: string;
 }
 
 export default function Home() {
@@ -49,11 +51,31 @@ export default function Home() {
   }, [isLoading]);
 
   const handleAnalyze = async (text: string, source: InputSource) => {
+    let finalText = text;
+    let translatedFrom: string | undefined;
+
+    // 비한국어 자동 번역
+    if (source === "text" || source === "voice") {
+      try {
+        const tr = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        const trData = await tr.json();
+        if (!trData.isKorean && trData.translatedText) {
+          finalText = trData.translatedText;
+          translatedFrom = trData.detectedLanguage;
+        }
+      } catch { /* 번역 실패 시 원문 사용 */ }
+    }
+
     const userMsg: Message = {
       id: `u-${Date.now()}`,
       role: "user",
-      text,
+      text: finalText,
       source,
+      translatedFrom,
     };
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
@@ -64,7 +86,7 @@ export default function Home() {
         const res = await fetch("/api/conversation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ conversation: text }),
+          body: JSON.stringify({ conversation: finalText }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "분석 오류");
@@ -73,7 +95,7 @@ export default function Home() {
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text: finalText }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "분석 오류");
@@ -143,13 +165,14 @@ export default function Home() {
 
         {messages.map((msg) =>
           msg.role === "user" ? (
-            <UserBubble key={msg.id} text={msg.text!} source={msg.source} />
+            <UserBubble key={msg.id} text={msg.text!} source={msg.source} translatedFrom={msg.translatedFrom} />
           ) : (
             <div key={msg.id} id={`result-${msg.id}`} className="bg-transparent">
               {msg.conversationResult ? (
                 <AssistantBubble emoji="💬" speakerType="대화 분석">
                   <ConversationResultCard result={msg.conversationResult} />
-                  <div className="flex justify-end pt-1">
+                  <div className="flex justify-end gap-1 pt-1">
+                    <ShareButton result={msg.conversationResult} type="conversation" text={msg.text} />
                     <CaptureButton targetId={`result-${msg.id}`} />
                   </div>
                 </AssistantBubble>
@@ -170,7 +193,8 @@ export default function Home() {
                     groundingNews={msg.result!.translation.groundingNews}
                   />
                   <SuggestCard suggestions={msg.result!.suggestions} />
-                  <div className="flex justify-end pt-1">
+                  <div className="flex justify-end gap-1 pt-1">
+                    <ShareButton result={msg.result!} type="analysis" text={msg.text} />
                     <CaptureButton targetId={`result-${msg.id}`} />
                   </div>
                 </AssistantBubble>

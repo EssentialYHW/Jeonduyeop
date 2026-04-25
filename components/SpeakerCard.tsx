@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -33,6 +34,22 @@ interface SpeakerCardProps {
 export default function SpeakerCard({ type, confidence, emotion, emotionPercent }: SpeakerCardProps) {
   const emoji = SPEAKER_EMOJI[type] || "🤔";
   const colorClass = SPEAKER_COLOR[type] || SPEAKER_COLOR["기타"];
+  const [imagenUrl, setImagenUrl] = useState<string | null>(null);
+  const [imagenLoading, setImagenLoading] = useState(true);
+
+  useEffect(() => {
+    setImagenUrl(null);
+    setImagenLoading(true);
+    fetch("/api/imagen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ speakerType: type }),
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d.imageData) setImagenUrl(d.imageData); })
+      .catch(() => {})
+      .finally(() => setImagenLoading(false));
+  }, [type]);
 
   return (
     <Card>
@@ -41,7 +58,15 @@ export default function SpeakerCard({ type, confidence, emotion, emotionPercent 
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3">
-          <span className="text-4xl">{emoji}</span>
+          {imagenLoading ? (
+            <div className="w-16 h-16 rounded-xl bg-muted animate-pulse flex items-center justify-center text-2xl">
+              {emoji}
+            </div>
+          ) : imagenUrl ? (
+            <img src={imagenUrl} alt={type} className="w-16 h-16 rounded-xl object-cover border shadow-sm" />
+          ) : (
+            <span className="text-4xl">{emoji}</span>
+          )}
           <Badge className={`text-base px-3 py-1 border ${colorClass}`} variant="outline">
             {type}
           </Badge>
